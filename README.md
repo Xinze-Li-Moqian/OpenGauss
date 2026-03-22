@@ -129,7 +129,7 @@ Gauss discovers `.gauss/project.yaml` upward from the current working directory,
   - a saved `ANTHROPIC_API_KEY` in `~/.gauss/.env`
 - If both are present, Gauss defaults to Claude's own local auth and only falls back to `ANTHROPIC_API_KEY` when no Claude credentials are available
 - Override with `gauss.autoformalize.auth_mode` in `~/.gauss/config.yaml`:
-  - `auto` (default): prefer local backend auth, then fall back to saved env/API-key auth
+  - `auto` (default): prefer local backend auth, then fall back to saved env/API-key auth; Claude Code drops into its normal interactive login flow when nothing is staged
   - `login`: ignore staged API-key auth and let the backend use the normal interactive login flow
   - `api-key`: force the managed session onto saved env/API-key auth
 - `uv` or `uvx` available

@@ -61,7 +61,7 @@ Inside the running TUI, use `/autoformalize-backend` to inspect or change the ba
 Gauss checks these before launching a managed Lean workflow session:
 
 - the selected backend CLI (`claude` or `codex`) is installed
-- backend auth is available
+- backend auth is available, or the selected handoff path can prompt you to log in interactively
 - `uv` or `uvx` is available
 - the current directory is inside a Lean project
 

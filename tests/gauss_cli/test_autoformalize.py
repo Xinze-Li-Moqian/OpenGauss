@@ -505,6 +505,56 @@ def test_build_claude_runtime_accepts_anthropic_api_key(monkeypatch, tmp_path: P
     assert runtime.child_env["GAUSS_YOLO_MODE"] == "1"
 
 
+def test_build_claude_runtime_auto_mode_without_auth_falls_back_to_login(monkeypatch, tmp_path: Path):
+    shared_bundle = _shared_bundle(tmp_path)
+    workflow = _workflow("/prove")
+    installed_plugin_root = (
+        tmp_path
+        / "managed"
+        / "claude-home"
+        / ".claude"
+        / "plugins"
+        / "cache"
+        / "lean4-skills"
+        / "lean4"
+        / "4.4.0"
+    )
+    (installed_plugin_root / "skills" / "lean4").mkdir(parents=True)
+    monkeypatch.setattr(autoformalize, "_require_executable", lambda name, _msg, _env: f"/usr/bin/{name}")
+    monkeypatch.setattr(autoformalize, "_claude_permission_args", lambda: ("--dangerously-skip-permissions",))
+    monkeypatch.setattr(autoformalize, "_install_managed_claude_plugin", lambda **_kwargs: installed_plugin_root)
+
+    runtime = autoformalize._build_claude_runtime(
+        auth_mode="auto",
+        user_instruction=workflow.workflow_args,
+        workflow=workflow,
+        base_environment={
+            "HOME": str(shared_bundle.real_home),
+            "PATH": "/usr/bin",
+        },
+        include_persisted_env=False,
+        shared_bundle=shared_bundle,
+    )
+
+    expected_prompt = autoformalize._build_startup_prompt(
+        runtime.managed_context,
+        workflow=workflow,
+        user_instruction=workflow.workflow_args,
+    )
+    assert runtime.argv == [
+        "/usr/bin/claude",
+        "--model",
+        autoformalize.CLAUDE_MODEL,
+        "--dangerously-skip-permissions",
+        expected_prompt,
+    ]
+    payload = json.loads((runtime.managed_context.backend_home / ".claude.json").read_text(encoding="utf-8"))
+    assert "primaryApiKey" not in payload
+    assert not (runtime.managed_context.backend_home / ".claude" / ".credentials.json").exists()
+    assert "ANTHROPIC_API_KEY" not in runtime.child_env
+    assert runtime.child_env["HOME"] == str(runtime.managed_context.backend_home)
+
+
 def test_build_claude_runtime_login_mode_strips_auth_env(monkeypatch, tmp_path: Path):
     shared_bundle = _shared_bundle(tmp_path)
     workflow = _workflow("/formalize")

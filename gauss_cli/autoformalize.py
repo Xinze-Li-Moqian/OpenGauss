@@ -750,11 +750,7 @@ def _build_claude_runtime(
         elif resolved_auth_env:
             auth_env = resolved_auth_env
         else:
-            raise AutoformalizePreflightError(
-                "Claude Code auth not found. Run `claude auth login`, save `ANTHROPIC_API_KEY`, "
-                "or set `gauss.autoformalize.auth_mode: login` "
-                "(or `GAUSS_AUTOFORMALIZE_AUTH_MODE=login`) to launch the normal Claude login flow."
-            )
+            strip_child_auth_env = True
     elif auth_mode == "login":
         copy_oauth_credentials = has_local_login
         strip_child_auth_env = True
