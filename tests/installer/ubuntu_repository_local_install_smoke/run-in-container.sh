@@ -52,6 +52,10 @@ assert_exists "$HOME/.local/bin/gauss"
 grep -F "Start immediately:" "$INSTALL_LOG" >/dev/null || die "expected installer summary to show the direct gauss path"
 grep -F "$HOME/.local/bin/gauss" "$INSTALL_LOG" >/dev/null || die "expected installer summary to print the linked gauss path"
 grep -F "cannot change PATH in the shell that launched ./scripts/install.sh" "$INSTALL_LOG" >/dev/null || die "expected installer summary to explain current-shell PATH behavior"
+grep -F "Managed /prove staging verified:" "$INSTALL_LOG" >/dev/null || die "expected installer to verify managed /prove staging in the Lean workspace"
+if grep -F "Skipping managed /prove staging verification" "$INSTALL_LOG" >/dev/null; then
+    die "expected installer managed /prove verification to run in the Lean workspace"
+fi
 if grep -F "Would you like to run the setup wizard now?" "$INSTALL_LOG" >/dev/null; then
     die "expected installer to skip the setup wizard prompt when a main provider was auto-configured"
 fi
